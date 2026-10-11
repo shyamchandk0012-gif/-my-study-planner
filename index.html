@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#172554">
+<meta name="description" content="A simple weekly study planner for class days and work days.">
+<link rel="manifest" href="manifest.json">
+<title>My Study Planner</title>
+<style>
+:root{color-scheme:light;--navy:#172554;--blue:#2563eb;--muted:#64748b;--line:#e2e8f0;--bg:#f5f7fb;--green:#15803d}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#0f172a}
+header{background:var(--navy);color:#fff;padding:24px 18px 28px;border-radius:0 0 26px 26px}
+.wrap{max-width:720px;margin:auto} .eyebrow{font-size:.75rem;letter-spacing:.13em;opacity:.75;font-weight:700}
+h1{font-size:1.8rem;line-height:1.15;margin:7px 0} .sub{opacity:.8;font-size:.95rem}
+main{padding:16px;max-width:720px;margin:auto}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:-10px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 10px;box-shadow:0 5px 18px #0f172a08}
+.stat strong{display:block;font-size:1.15rem;white-space:nowrap}.stat span{font-size:.75rem;color:var(--muted)}
+.progress-card,.day-card,.install-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;margin-top:14px}
+.progress-head{display:flex;justify-content:space-between;gap:12px;font-size:.9rem;font-weight:650}
+.track{height:8px;background:#e2e8f0;border-radius:20px;overflow:hidden;margin-top:10px}.fill{height:100%;width:0;background:#22a06b;transition:width .2s}
+.tabs{display:flex;gap:8px;margin:18px 0 8px}.tab{flex:1;border:1px solid var(--line);background:#fff;border-radius:12px;padding:11px;font-weight:650;color:#334155}.tab.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+.day-card{margin-top:10px}.day-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.day-head h2{font-size:1.05rem;margin:0}.kind{color:var(--muted);font-size:.8rem;margin-top:3px}.total{background:#eff6ff;color:#1d4ed8;border-radius:999px;padding:6px 9px;font-size:.78rem;font-weight:750;white-space:nowrap}
+.task{display:flex;align-items:flex-start;gap:11px;padding:12px 0;border-top:1px solid #f1f5f9;cursor:pointer}
+.task input{width:21px;height:21px;accent-color:var(--green);margin:1px 0 0;flex-shrink:0}
+.task-title{font-weight:650;font-size:.94rem}.task-time{font-size:.82rem;color:var(--muted);margin-top:3px}.task.done .task-title{text-decoration:line-through;color:#64748b}
+button{font:inherit;cursor:pointer}.actions{display:flex;gap:9px;margin-top:15px}.secondary,.primary{border-radius:12px;padding:11px 13px;font-weight:650;border:1px solid var(--line);background:#fff;color:#334155}.primary{background:var(--blue);color:white;border-color:var(--blue);flex:1}
+.note{color:var(--muted);font-size:.82rem;line-height:1.5;margin:14px 2px}.hidden{display:none!important}
+.install-card h2{font-size:1rem;margin:0 0 7px}.install-card p{font-size:.86rem;line-height:1.5;color:#475569;margin:0}
+footer{text-align:center;color:#94a3b8;font-size:.75rem;padding:20px}
+@media(max-width:380px){.stats{gap:6px}.stat{padding:12px 7px}.stat strong{font-size:1rem}.stat span{font-size:.68rem}}
+</style>
+</head>
+<body>
+<header><div class="wrap"><div class="eyebrow">YOUR PERSONAL ROUTINE</div><h1>My Study Planner 📚</h1><div class="sub">A balanced weekly plan, one task at a time.</div></div></header>
+<main>
+  <section class="stats" aria-label="Weekly totals">
+    <div class="stat"><strong>20h 10m</strong><span>Planned study/week</span></div>
+    <div class="stat"><strong>6h 30m</strong><span>Class days · 3 days</span></div>
+    <div class="stat"><strong>13h 40m</strong><span>Work days · 4 days</span></div>
+  </section>
+  <section class="progress-card">
+    <div class="progress-head"><span>Weekly progress</span><span id="progressText">0 of 15 tasks</span></div>
+    <div class="track"><div class="fill" id="progressFill"></div></div>
+  </section>
+  <div class="tabs" role="tablist">
+    <button class="tab active" id="weeklyTab" role="tab" aria-selected="true">Weekly plan</button>
+    <button class="tab" id="todayTab" role="tab" aria-selected="false">Today</button>
+  </div>
+  <div id="days"></div>
+  <section class="install-card">
+    <h2>📲 Add to your home screen</h2>
+    <p>For an installable app icon, this app must be hosted on a secure HTTPS website. Open the hosted app in Chrome, tap ⋮, then choose <b>Add to Home screen</b> or <b>Install app</b>. Your checked tasks are saved on this device.</p>
+  </section>
+  <div class="actions"><button class="secondary" id="resetBtn">Reset weekly checks</button><button class="primary" id="todayBtn">Go to today</button></div>
+  <p class="note">Study plan: class days are Monday, Wednesday and Friday. Work days are Tuesday, Thursday, Saturday and Sunday. The night study session is 11:05 PM–12:15 AM, so it finishes after midnight.</p>
+</main>
+<footer>My Study Planner · Made for your routine</footer>
+<script>
+const plan = [
+ {day:"Monday",kind:"Class day",tasks:[["Morning study","7:15–8:15 AM","1 hr"],["Night study","11:05 PM–12:15 AM","1 hr 10 min"]]},
+ {day:"Tuesday",kind:"Work day",tasks:[["Morning study","7:15–9:00 AM","1 hr 45 min"],["Practice exam","9:00–9:30 AM","30 min"],["Night study","11:05 PM–12:15 AM","1 hr 10 min"]]},
+ {day:"Wednesday",kind:"Class day",tasks:[["Morning study","7:15–8:15 AM","1 hr"],["Night study","11:05 PM–12:15 AM","1 hr 10 min"]]},
+ {day:"Thursday",kind:"Work day",tasks:[["Morning study","7:15–9:00 AM","1 hr 45 min"],["Practice exam","9:00–9:30 AM","30 min"],["Night study","11:05 PM–12:15 AM","1 hr 10 min"]]},
+ {day:"Friday",kind:"Class day",tasks:[["Morning study","7:15–8:15 AM","1 hr"],["Night study","11:05 PM–12:15 AM","1 hr 10 min"]]},
+ {day:"Saturday",kind:"Work day",tasks:[["Morning study","7:15–9:00 AM","1 hr 45 min"],["Practice exam","9:00–9:30 AM","30 min"],["Night study","11:05 PM–12:15 AM","1 hr 10 min"]]},
+ {day:"Sunday",kind:"Work day",tasks:[["Morning study","7:15–9:00 AM","1 hr 45 min"],["Practice exam","9:00–9:30 AM","30 min"],["Night study","11:05 PM–12:15 AM","1 hr 10 min"]]}
+];
+const key="study-planner-checks-v1";
+let checked={}; try{checked=JSON.parse(localStorage.getItem(key)||"{}")}catch(e){checked={}}
+const dayContainer=document.getElementById("days");
+function taskId(day,i){return day.toLowerCase()+"-"+i}
+function render(){
+ const viewToday=document.body.dataset.view==="today";
+ dayContainer.innerHTML="";
+ const todayName=new Intl.DateTimeFormat("en-US",{weekday:"long"}).format(new Date());
+ const list=viewToday?plan.filter(d=>d.day===todayName):plan;
+ if(viewToday && !list.length){dayContainer.innerHTML='<section class="day-card"><h2>Today</h2><p class="note">No schedule found for today.</p></section>';return}
+ list.forEach(d=>{
+  const card=document.createElement("section");card.className="day-card";
+  const minutes=d.tasks.reduce((sum,t)=>sum+(t[2]==="1 hr"?60:t[2]==="1 hr 10 min"?70:t[2]==="1 hr 45 min"?105:30),0);
+  const totalText=minutes>=60?`${Math.floor(minutes/60)}h ${minutes%60?minutes%60+"m":""}`.trim():`${minutes}m`;
+  card.innerHTML=`<div class="day-head"><div><h2>${d.day}</h2><div class="kind">${d.kind}</div></div><span class="total">${totalText}</span></div>`;
+  d.tasks.forEach((t,i)=>{
+   const id=taskId(d.day,i),label=document.createElement("label");label.className="task"+(checked[id]?" done":"");
+   label.innerHTML=`<input type="checkbox" ${checked[id]?"checked":""}><div><div class="task-title">${t[0]}</div><div class="task-time">${t[1]} · ${t[2]}</div></div>`;
+   label.querySelector("input").addEventListener("change",e=>{checked[id]=e.target.checked;try{localStorage.setItem(key,JSON.stringify(checked))}catch(err){}renderProgress();label.classList.toggle("done",e.target.checked)});
+   card.appendChild(label);
+  });
+  dayContainer.appendChild(card);
+ });
+}
+function renderProgress(){
+ let total=0,done=0;plan.forEach(d=>d.tasks.forEach((t,i)=>{total++;if(checked[taskId(d.day,i)])done++}));
+ document.getElementById("progressText").textContent=`${done} of ${total} tasks`;
+ document.getElementById("progressFill").style.width=(done/total*100)+"%";
+}
+function setView(view){document.body.dataset.view=view;document.getElementById("weeklyTab").classList.toggle("active",view==="weekly");document.getElementById("todayTab").classList.toggle("active",view==="today");document.getElementById("weeklyTab").setAttribute("aria-selected",view==="weekly");document.getElementById("todayTab").setAttribute("aria-selected",view==="today");render()}
+document.getElementById("weeklyTab").addEventListener("click",()=>setView("weekly"));
+document.getElementById("todayTab").addEventListener("click",()=>setView("today"));
+document.getElementById("todayBtn").addEventListener("click",()=>{setView("today");window.scrollTo({top:0,behavior:"smooth"})});
+document.getElementById("resetBtn").addEventListener("click",()=>{if(confirm("Clear all checked tasks for this week?")){checked={};try{localStorage.removeItem(key)}catch(e){}render();renderProgress()}});
+render();renderProgress();
+if("serviceWorker" in navigator && location.protocol.startsWith("http"))navigator.serviceWorker.register("./service-worker.js").catch(()=>{});
+</script>
+</body>
+</html>

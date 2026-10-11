@@ -1,0 +1,10 @@
+{
+  "name": "My Study Planner",
+  "short_name": "Study Planner",
+  "description": "Weekly study routine and task tracker",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f5f7fb",
+  "theme_color": "#172554",
+  "icons": []
+}
